@@ -197,7 +197,7 @@
         sendButton.disabled = true;
         conversation.scrollIntoView({ behavior: 'smooth', block: 'start' });
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 65000);
+        const timer = setTimeout(() => controller.abort(), 180000);
         try {
           const apiResponse = await fetch(apiUrl, {
             method: 'POST',
