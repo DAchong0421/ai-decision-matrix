@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: ai-decision-matrix
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/analyze
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SITE_ACCESS_TOKEN
+        sync: false
