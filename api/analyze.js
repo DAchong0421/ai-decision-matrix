@@ -1,8 +1,8 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 
 const MODES = Object.freeze({
-  quick: { model: 'gpt-6-luna', effort: 'none', maxOutput: 900, search: false },
-  search: { model: 'gpt-6-sol', effort: 'low', maxOutput: 1400, search: true },
+  quick: { model: 'gpt-6-luna', effort: 'none', maxOutput: 900, search: true },
+  search: { model: 'gpt-6-sol', effort: 'low', maxOutput: 1400, search: true, requireSearch: true },
   expert: { model: 'gpt-6-sol', effort: 'medium', maxOutput: 1800, search: true },
   deep: { model: 'gpt-6-astra', effort: 'high', maxOutput: 2400, search: true },
 });
@@ -128,6 +128,7 @@ export default {
       store: false,
     };
     if (mode.search) payload.tools = [{ type: 'web_search' }];
+    if (mode.requireSearch) payload.tool_choice = 'required';
 
     let upstream;
     try {
@@ -158,6 +159,6 @@ export default {
     }
     const { answer, citations } = collectAnswer(result);
     if (!answer) return json({ error: 'AI 服务没有返回可显示的分析。' }, 502, origin);
-    return json({ answer, citations, model: mode.model, searched: mode.search, generatedAt: new Date().toISOString() }, 200, origin);
+    return json({ answer, citations, model: mode.model, searched: (result.output ?? []).some((item) => item.type === 'web_search_call'), generatedAt: new Date().toISOString() }, 200, origin);
   },
 };
