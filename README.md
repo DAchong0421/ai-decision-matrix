@@ -4,9 +4,9 @@
 
 ## 在线部署
 
-- Render：`render.yaml` 和 `render/server.js` 提供网页与 API 的同域部署。
+- Render 主站：<https://ai-decision-matrix.onrender.com/>。`render.yaml` 和 `render/server.js` 提供网页与 API 的同域部署。
 - Vercel：`api/analyze.js` 是 Node.js Function，`public/index.html` 是网页。
-- GitHub Pages：仅能托管静态网页；要启用提问功能，需把 `window.AI_MATRIX_API_URL` 指向已部署的 API。
+- GitHub Pages 备用地址：<https://dachong0421.github.io/ai-decision-matrix/>。根目录 `index.html` 已指向 Render API；修改 `dist/index.html` 后，应同步更新根目录文件。
 
 生产环境必须通过托管平台的密钥设置保存 `OPENAI_API_KEY` 和 `SITE_ACCESS_TOKEN`。两者都不能进入公开仓库。`.env.local` 已被 `.gitignore` 排除。
 
