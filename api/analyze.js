@@ -153,8 +153,15 @@ export default {
         // An upstream error can have an empty or non-JSON body.
       }
       const providerCode = typeof providerError.code === 'string' ? providerError.code : '';
+      const billingCodes = new Set([
+        'insufficient_quota',
+        'credit_balance_exhausted',
+        'organization_usage_limit_exceeded',
+        'organization_spend_limit_exceeded',
+        'project_spend_limit_exceeded',
+      ]);
       if (upstream.status === 429) {
-        if (providerCode === 'insufficient_quota') {
+        if (billingCodes.has(providerCode) || providerError.type === 'insufficient_quota') {
           return json({ error: 'OpenAI API 账户额度不足，请检查 API 账单和用量上限。', code: providerCode }, 429, origin);
         }
         if (providerCode === 'rate_limit_exceeded') {
