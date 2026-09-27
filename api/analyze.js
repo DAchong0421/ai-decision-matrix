@@ -146,9 +146,27 @@ export default {
     }
 
     if (!upstream.ok) {
-      if (upstream.status === 429) return json({ error: '请求过于频繁或账户额度不足，请稍后重试。' }, 429, origin);
-      if (upstream.status === 401 || upstream.status === 403) return json({ error: 'AI 服务授权失败，请联系站点管理员。' }, 502, origin);
-      return json({ error: 'AI 服务暂时无法完成分析，请稍后重试。' }, 502, origin);
+      let providerError = {};
+      try {
+        providerError = (await upstream.json()).error ?? {};
+      } catch {
+        // An upstream error can have an empty or non-JSON body.
+      }
+      const providerCode = typeof providerError.code === 'string' ? providerError.code : '';
+      if (upstream.status === 429) {
+        if (providerCode === 'insufficient_quota') {
+          return json({ error: 'OpenAI API 账户额度不足，请检查 API 账单和用量上限。', code: providerCode }, 429, origin);
+        }
+        if (providerCode === 'rate_limit_exceeded') {
+          return json({ error: '触发了 OpenAI API 的速率限制，请稍后重试。', code: providerCode }, 429, origin);
+        }
+        return json({ error: 'OpenAI API 返回了 429，请检查账户额度或稍后重试。', code: providerCode || 'upstream_429' }, 429, origin);
+      }
+      if (providerCode === 'model_not_found') {
+        return json({ error: '当前 API 项目无法使用所选模型。', code: providerCode }, 502, origin);
+      }
+      if (upstream.status === 401 || upstream.status === 403) return json({ error: 'AI 服务授权失败，请联系站点管理员。', code: providerCode || 'upstream_auth' }, 502, origin);
+      return json({ error: 'AI 服务暂时无法完成分析，请稍后重试。', code: providerCode || 'upstream_error' }, 502, origin);
     }
 
     let result;
